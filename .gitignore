@@ -2,6 +2,10 @@
 /Data/MillionSongSubset/
 /.ipynb_checkpoints/
 /config.py
-/01_Web_Scraper.ipynb
+/Extra Stuff/01_Web_Scraper.ipynb
 
 .idea
+/Extra Stuff/selenium-scraping/
+/chromedriver/
+/data/
+/Extra Stuff/Untitled.ipynb
