@@ -50,7 +50,7 @@ def plot_chroma(file, title):
 	plt.colorbar()
 	plt.title(title + ' Chromagram')
 	plt.tight_layout()
-	plt.show();
+	plt.show()
 	pass
 
 
@@ -97,7 +97,6 @@ def enhanced_chroma_parser(file):
 		chroma_smooth = np.mean(scipy.ndimage.median_filter(chroma_filter, size=(1, 9)).T, axis=0)
 
 
-
 	except Exception as e:
 		print("Error encountered while parsing file: ", file)
 		return None, None
@@ -108,11 +107,22 @@ def enhanced_chroma_parser(file):
 	return chroma_smooth
 
 
-def static_tempo(file, bpm_estimate=120.0):
-	y, sr = librosa.load(file, sr=42000, res_type="kaiser_fast")
 
-	onset_env = librosa.onset.onset_strength(y, sr=sr)
+def get_mfc(file, sample_rate=42000):
 
-	tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, start_bpm=bpm_estimate)
+	try:
 
-	return tempo
+		y, sr = librosa.load(file, sr=sample_rate, res_type='kaiser_fast')
+
+		# Let's make and display a mel-scaled power (energy-squared) spectrogram
+		S = librosa.feature.melspectrogram(y, sr=sr, n_mels=128)
+
+		# Convert to log scale (dB). We'll use the peak power as reference.
+		mfc = librosa.amplitude_to_db(S, ref=np.max)
+
+	except:
+		print("Error encountered while parsing file: ", file)
+		return None, None
+
+
+	return mfc
