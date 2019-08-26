@@ -2,12 +2,13 @@ import librosa
 import numpy as np
 
 
-def beat_feat_parser(file: str, n_mfccs: int = 40, sr: int = 22050, hop_length: int = 512, start_bpm: float = 150.0):
+def beat_feat_parser(file: str, n_mfccs: int = 40, sr: int = 22050, hop_length: int = 512, start_bpm: float = 140.0):
 	"""
 
 	:param file: String; name of the file to extract features from.
 
-	:param n_mfccs: Int; number of mel-frequency cepstral coefficients to generate. Default is 40 because that's what I used.
+	:param n_mfccs: Int; number of mel-frequency cepstral coefficients to generate. Default is 40 because that's what I
+	used.
 
 	:param sr: Int; the sample rate, set to 22050 for default (42000 recommended music but takes longer and the
 	resulting array is significantly bigger.
@@ -94,3 +95,51 @@ def static_tempo(file: str, bpm_estimate: float = 120.0):
 	tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr, start_bpm=bpm_estimate)
 
 	return tempo
+
+
+def feat_parser(file: str, n_mfccs: int = 40, sr: int = 22050, hop_length: int = 512):
+
+	try:
+
+		# Kaiser fast speeds up loading the audio time series at the cost of some quality.
+		y = librosa.load(file, sr=sr, res_type="kaiser_fast")[0]
+
+		# Separate harmonics and percussives into two waveforms
+		y_harmonic = librosa.effects.hpss(y)[0]
+
+		# Beat track on the percussive signal
+
+		# Compute MFCC features from the raw signal
+		mfcc = librosa.feature.mfcc(y=y, sr=sr, hop_length=hop_length, n_mfcc=n_mfccs)
+
+		# And the first-order differences (delta features)
+		mfcc_delta = librosa.feature.delta(mfcc)
+		#
+		# # Stack and synchronize between beat events
+		# # This time, we'll use the mean value (default) instead of median
+		beat_mfcc_delta = librosa.util.sync(np.vstack([mfcc, mfcc_delta]),
+		                                    500)
+
+		# Aggregating feature to condense into single subfeature vector.
+		# beat_mfcc_mean = np.mean(beat_mfcc_delta.T, axis=0)
+
+		# Compute chroma features from the harmonic signal
+		chromagram = librosa.feature.chroma_cqt(y=y_harmonic,
+		                                        sr=sr)
+
+		# Aggregate chroma features between beat events
+		# We'll use the median value of each feature between beat frames
+		beat_chroma = librosa.util.sync(chromagram,
+		                                512,
+		                                aggregate=np.median)
+
+		# beat_chroma_mean = np.mean(beat_chroma.T, axis=0)
+
+		# Finally, stack all beat-synchronous features together
+		beat_features = np.hstack([beat_chroma, beat_mfcc_delta])
+
+	except:
+		print("Error encountered while parsing file: ", file)
+		return None, None
+
+	return beat_features

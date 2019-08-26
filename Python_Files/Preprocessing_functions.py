@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import scipy
 
 import librosa
-from librosa import display, beat
-from librosa.feature import chroma_stft, melspectrogram
+from librosa import display
+from librosa.feature import chroma_stft
 
 
 def plot_mfc(song, title):
+
 	y, sr = librosa.load(song, sr=42000, res_type='kaiser_fast')
 
 	# Let's make and display a mel-scaled power (energy-squared) spectrogram
@@ -96,8 +97,7 @@ def enhanced_chroma_parser(file):
 
 		chroma_smooth = np.mean(scipy.ndimage.median_filter(chroma_filter, size=(1, 9)).T, axis=0)
 
-
-	except Exception as e:
+	except:
 		print("Error encountered while parsing file: ", file)
 		return None, None
 
@@ -105,7 +105,6 @@ def enhanced_chroma_parser(file):
 	#     label = row
 
 	return chroma_smooth
-
 
 
 def get_mfc(file, sample_rate=42000):
@@ -123,6 +122,5 @@ def get_mfc(file, sample_rate=42000):
 	except:
 		print("Error encountered while parsing file: ", file)
 		return None, None
-
 
 	return mfc
