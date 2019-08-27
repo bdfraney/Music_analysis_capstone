@@ -62,5 +62,5 @@ My "final" model did ok, I was able to improve the initial accuracy and develop 
 
 - [LibROSA](https://librosa.github.io/librosa/)
 - [Mutagen](https://mutagen.readthedocs.io/en/latest/index.html)
-- [.py files](./Python_files) contains functions all of the functions. 
+- [.py files](./Python_Files) contains functions all of the functions. 
 - [Audio Content Analysis Lecture Series](https://www.audiocontentanalysis.org/) The author's repo for this class is also being updated with his own python scripts for computations and functions related to the course.
