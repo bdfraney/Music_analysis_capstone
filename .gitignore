@@ -9,3 +9,8 @@
 /chromedriver/
 /Extra Stuff/Untitled.ipynb
 /Notebooks/.ipynb_checkpoints/
+/data/.h5_files/D1_subset_std_feats.h5
+/data/.h5_files/D1_subset_weights.h5
+/data/dnb_df.csv
+/data/feats.csv
+/data/dstep_df.csv
