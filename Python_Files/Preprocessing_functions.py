@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import scipy
 
 import librosa
-from librosa import display
 from librosa.feature import chroma_stft
 
 
@@ -124,3 +123,36 @@ def get_mfc(file, sample_rate=42000):
 		return None, None
 
 	return mfc
+
+
+def mfcc_chroma_parser(file, sample_rate=22050, n_mels=114):
+	"""
+Combination of the mfcc parser and the enhance chroma.
+	:param file: String for file path
+	:param sample_rate:
+	:param n_mels: number of mel coefficients.
+	"""
+	try:
+
+		# Load in the song using kaiser_fast to speed up loading
+		y, sr = librosa.load(file, sr=42000, res_type='kaiser_fast')
+
+		y_harm = librosa.effects.harmonic(y=y, margin=8)
+		chroma_os_harm = librosa.feature.chroma_cqt(y=y_harm, sr=sr, bins_per_octave=12 * 3)
+
+		chroma_filter = np.minimum(chroma_os_harm, librosa.decompose.nn_filter(chroma_os_harm, aggregate=np.median,
+		                                                                       metric='cosine'))
+
+		chroma_smooth = np.mean(scipy.ndimage.median_filter(chroma_filter, size=(1, 9)).T, axis=0)
+
+
+		# here kaiser_fast is a technique used for faster extraction (though it does negatively affect quality)
+		X, sample_rate = librosa.load(file, sr=sample_rate, res_type='kaiser_fast')
+
+		# we extract mfcc feature from data, Use the mean so that scale isn't an issue.
+		mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0)
+
+	except Exception:
+		print("Error encountered while parsing file: ", file)
+		return None, None
+
